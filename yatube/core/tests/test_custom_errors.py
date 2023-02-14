@@ -16,7 +16,7 @@ class TestCustomErrors(TestCase):
         response_404 = self.guest_client.get('/unexisted/')
         response_403 = self.csrf_client.get(
             reverse_lazy(
-                'posts:index'
+                'posts:post_create'
             )
         )
         self.assertTemplateUsed(
