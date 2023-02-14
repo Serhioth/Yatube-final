@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+{% block title %}title{% endblock title %}
+{% block content %}
+  <div class="container">
+    <h1>Группа: {{ group.title }}</h1>
+  </div>
+  <div class="container d-flex justify-content-between align-items-center">        
+    <h4>Описание: {{ group.description }}</h4>
+    <p>Всего записей: {{ group.posts.count }}</p>
+  </div>
+{% for post in page_obj %}
+  {% include 'posts/includes/post_list.html' %}
+{% endfor %}
+  <div class="container">
+    {% include 'posts/includes/paginator.html' %}
+  </div>
+{% endblock content %}

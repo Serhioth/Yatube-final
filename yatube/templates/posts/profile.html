@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+{% block content %}
+<div class="container">
+  <h2>Пользователь {{ author.get_full_name }}</h2>
+</div>
+<div class="container">        
+  <h4>Всего записей: {{ author.posts.count }}</h4>
+  {% if author != request.user %}
+    {% if following %}
+      <a
+        class="btn btn-lg btn-light"
+        href="{% url 'posts:profile_unfollow' author.username %}" role="button"
+      >
+        Отписаться
+      </a>
+    {% else %}
+        <a
+          class="btn btn-lg btn-primary"
+          href="{% url 'posts:profile_follow' author.username %}" role="button"
+        >
+          Подписаться
+        </a>
+    {% endif %}
+  {% endif %}
+</div>
+{% for post in page_obj %}
+<div class="container">
+  <div class="card row my-3 ">
+    <div class="card-header">
+      <h4 class="card-title">Сообщение {{ post.author.get_full_name }}</h4>
+    </div>
+    {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+      <img class="card-img my-2" src="{{ im.url }}">
+    {% endthumbnail %}
+    <div class="card-block">
+      <p class="card-text">{{post.text}}</p>
+      <hr>
+      <p><a href="{% url 'posts:post_detail' post.id %}">подробная информация </a></p>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+      <p class="card-text mb-2 text-muted"><b>Дата публикации:</b> {{ post.pub_date|date:"d E Y" }}</p>
+      {% if post.author == request.user %}
+        <a href="{% url 'posts:post_edit' post.id %}" class="btn btn-primary">Редактировать пост</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+<div class="container">
+  {% include 'posts/includes/paginator.html' %}
+</div>
+{% endblock content %}

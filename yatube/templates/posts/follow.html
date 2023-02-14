@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load thumbnail %}
+{% block content %}
+{% for post in page_obj %}
+  {% include 'posts/includes/post_list.html' %}
+{% endfor %}
+  <div class="container">
+    {% include 'posts/includes/paginator.html' %}
+  </div>
+{% endblock content %}

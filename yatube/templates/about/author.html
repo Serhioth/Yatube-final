@@ -1,0 +1,23 @@
+<!-- templates/about/author.html -->
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+<h1>Привет, я автор</h1>
+<p>
+  Меня зовут Сергей и здесь я немного расскажу о себе. :)
+</p>
+<div class="container">
+    <div class="row align-items-start">
+      <div class="col">
+        <img src="{%static 'img/author/IMG_author_bar.jpg' %}" width="400" height="800" class="img-thumbnail" alt="Ну работай уже">
+      </div>
+      <div class="col">
+        <p>Когда-то я работыл барменом, и даже был неплох в этом деле, но однажды решил, что это не для меня. С тех пор началась моя дорога приключений в IT-индустрии. 
+        Сейчас я работаю сисадмином, ну как, эникеем, но моя настоящая любовь - программирование. Ещё в баре меня вела страсть к созданию чего-то нового, и именно здесь я вижу возможность реализовать её на полную.</p>
+        <p> <img src="{%static 'img/author/ANIM_fire.gif' %}" width="480" height="500" alt=''></p>
+      </div>
+      <div class="col">
+        <img src="{%static 'img/author/IMG_author_bar_mirror.jpg' %}" width="400" height="800" class="img-thumbnail" alt="Ну работай уже">
+      </div>
+{% endblock %}
