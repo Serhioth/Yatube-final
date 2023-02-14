@@ -9,11 +9,12 @@ class TestCustomErrors(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.guest_client = Client(enforce_csrf_checks=True)
+        cls.guest_client = Client()
+        cls.csrf_client = Client(enforce_csrf_checks=True)
 
     def test_custom_templates(self):
         response_404 = self.guest_client.get('/unexisted/')
-        response_403 = self.guest_client.get(
+        response_403 = self.csrf_client.get(
             reverse_lazy(
                 'posts:index'
             )
