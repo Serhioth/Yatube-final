@@ -11,6 +11,7 @@ urlpatterns = [path('', include('posts.urls', namespace='posts')),
                path('about/', include('about.urls', namespace='about'))]
 
 handler404 = 'core.views.page_not_found'
+handler403 = 'core.views.csrf_failure'
 
 if settings.DEBUG:
     urlpatterns += static(
