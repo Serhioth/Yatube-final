@@ -1,17 +1,28 @@
-from django.test import TestCase
-from django.http import HttpResponseForbidden, Http404
+from django.test import TestCase, Client
+from django.urls import reverse_lazy
 
 
 class TestCustomErrors(TestCase):
     """
     Тест шаблонов кастомных ошибок
     """
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.guest_client = Client()
+
     def test_custom_templates(self):
+        response_404 = self.guest_client.get('/unexisted/')
+        response_403 = self.guest.client.get(
+            reverse_lazy(
+                'posts:post_create'
+            )
+        )
         self.assertTemplateUsed(
-            Http404,
+            response_404,
             'core/404.html'
         )
         self.assertTemplateUsed(
-            HttpResponseForbidden,
+            response_403,
             'core/403csrf.html'
         )
