@@ -8,6 +8,7 @@ class TestCustomErrors(TestCase):
     """
     def setUp(self) -> None:
         self.guest_client = Client
+
     def test_custom_templates(self):
         self.assertTemplateUsed(
             self.guest_client.get(Http404),
