@@ -13,7 +13,7 @@ class TestCustomErrors(TestCase):
 
     def test_custom_templates(self):
         response_404 = self.guest_client.get('/unexisted/')
-        response_403 = self.guest.client.get(
+        response_403 = self.guest_client.get(
             reverse_lazy(
                 'posts:index'
             )
