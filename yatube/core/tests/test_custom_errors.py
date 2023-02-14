@@ -7,7 +7,7 @@ class TestCustomErrors(TestCase):
     Тест шаблонов кастомных ошибок
     """
     def setUp(self) -> None:
-        self.guest_client = Client
+        self.guest_client = Client()
 
     def test_custom_templates(self):
         self.assertTemplateUsed(
