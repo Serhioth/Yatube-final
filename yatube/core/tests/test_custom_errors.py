@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from django.http import HttpResponseForbidden, Http404
+from django.urls import reverse_lazy
 
 
 class TestCustomErrors(TestCase):
@@ -8,13 +8,18 @@ class TestCustomErrors(TestCase):
     """
     def setUp(self) -> None:
         self.guest_client = Client()
+        self.csrf_client = Client(enforce_csrf_checks=True)
 
     def test_custom_templates(self):
         self.assertTemplateUsed(
-            self.guest_client.get(Http404),
+            self.guest_client.get('/unexisted/'),
             'core/404.html'
         )
         self.assertTemplateUsed(
-            self.guest_client.get(HttpResponseForbidden),
+            self.guest_client.post(
+                reverse_lazy(
+                    'posts:index'
+                )
+            ),
             'core/403csrf.html'
         )
