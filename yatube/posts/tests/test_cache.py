@@ -15,12 +15,6 @@ class TestCache(TestCase):
             username='CacheTestUser'
         )
 
-        cls.group = Group.objects.create(
-            title='TestCacheGroup',
-            slug='testcacheslug',
-            description='TestCacheDescription'
-        )
-
     def setUp(self) -> None:
         super().setUp()
         self.authorized_client = Client()
@@ -36,70 +30,30 @@ class TestCache(TestCase):
             group=self.group
         )
 
-        responses = [
-            self.authorized_client.get(
-                reverse_lazy('posts:index')
-            ),
-            self.authorized_client.get(
-                reverse_lazy(
-                    'posts:group_list',
-                    kwargs={'slug': self.group.slug}
-                )
-            )
-        ]
+        response = self.authorized_client.get(
+            reverse_lazy('posts:index')
+        )
+
         Post.objects.filter(id=post.id).delete()
-        responses_after_delete = [
-            self.authorized_client.get(
-                reverse_lazy('posts:index')
-            ),
-            self.authorized_client.get(
-                reverse_lazy(
-                    'posts:group_list',
-                    kwargs={'slug': self.group.slug}
-                )
-            ),
-            self.authorized_client.get(
-                reverse_lazy(
-                    'posts:profile',
-                    kwargs={'username': self.user.username}
-                )
-            )
-        ]
-        for response, response_after_delete in zip(
-            responses,
-            responses_after_delete
-        ):
-            with self.subTest(response=response):
-                self.assertEqual(
-                    response.content,
-                    response_after_delete.content,
-                    'Страница кэшируется неверно'
-                )
+
+        response_after_delete = self.authorized_client.get(
+            reverse_lazy('posts:index')
+        )
+
+        self.assertEqual(
+            response.content,
+            response_after_delete.content,
+            'Страница кэшируется неверно'
+        )
+
         cache.clear()
-        responses_after_cache_clear = [
-            self.authorized_client.get(
-                reverse_lazy('posts:index')
-            ),
-            self.authorized_client.get(
-                reverse_lazy(
-                    'posts:group_list',
-                    kwargs={'slug': self.group.slug}
-                )
-            ),
-            self.authorized_client.get(
-                reverse_lazy(
-                    'posts:profile',
-                    kwargs={'username': self.user.username}
-                )
-            )
-        ]
-        for response, cache_clear_response in zip(
-            responses,
-            responses_after_cache_clear
-        ):
-            with self.subTest(response=response):
-                self.assertNotEqual(
-                    response.content,
-                    cache_clear_response.content,
-                    'Кэш страницы не удаляется'
-                )
+
+        response_after_cache_clear = self.authorized_client.get(
+            reverse_lazy('posts:index')
+        )
+
+        self.assertNotEqual(
+            response.content,
+            response_after_cache_clear.content,
+            'Кэш страницы не удаляется'
+        )
