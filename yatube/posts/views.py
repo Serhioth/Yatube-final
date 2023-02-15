@@ -128,7 +128,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    form = PostForm()
+    form_class = PostForm
     title = 'Создание новой записи'
 
     def form_valid(self, form):
@@ -148,7 +148,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['title'] = self.title
-        context['form'] = self.form
+        context['form'] = self.form_class
         return context
 
 
