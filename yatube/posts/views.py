@@ -126,7 +126,7 @@ class PostDetailView(DetailView):
         return context
 
 
-class PostCreateView(LoginRequiredMixin, CreateView):
+class PostCreateView(LoginRequiredMixin, UpdateView):
     model = Post
     form = PostForm()
     title = 'Создание новой записи'
