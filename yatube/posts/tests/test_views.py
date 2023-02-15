@@ -101,7 +101,7 @@ class PostsPagesTest(TestCase):
         """Проверка, что значение titles верно передано"""
         titles = [
             'Последние обновления на сайте',
-            'Сообщения группы',
+            f'Сообщения группы {self.group.title}',
             f'Профиль пользователя {self.user.get_full_name()}',
             str(self.post),
             'Создание новой записи',
