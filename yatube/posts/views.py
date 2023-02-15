@@ -39,7 +39,7 @@ class GroupView(ListView):
         return group
 
     def get_queryset(self):
-        group_posts = self.get_object().posts.all()
+        group_posts = Post.objects.filter(group__slug=self.kwargs['slug'])
         return group_posts
 
     def get_context_data(self, **kwargs):
