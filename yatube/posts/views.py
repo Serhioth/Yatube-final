@@ -99,6 +99,7 @@ class ProfileView(ListView):
 
 class PostDetailView(DetailView):
     model = Post
+    form = CommentForm()
 
     def get_object(self):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
@@ -120,9 +121,9 @@ class PostDetailView(DetailView):
         context = super(PostDetailView, self).get_context_data(**kwargs)
         context['title'] = str(self.get_object())
         context['post'] = self.get_object()
-        context['comments'] = self.get_comments
+        context['form'] = self.form
+        context['comments'] = self.get_comments()
         return context
-
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -130,12 +131,10 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     title = 'Создание новой записи'
 
     def form_valid(self, form):
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = self.request.user
-            post.save()
-            return super().form_valid(form)
-        return self.form_class()
+        post = form.save(commit=False)
+        post.author = self.request.user
+        post.save()
+        return super().form_valid(form)
 
     def get_success_url(self):
         username = self.request.user.get_username()
@@ -148,7 +147,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['title'] = self.title
-        context['form'] = self.form_class()
         return context
 
 
@@ -166,17 +164,12 @@ class PostEditView(LoginRequiredMixin, UpdateView):
         context = super(PostEditView, self).get_context_data(**kwargs)
         context['title'] = self.title
         context['post'] = self.get_object()
-        context['form'] = self.form_class(
-            instance=Post.objects.get(pk=self.kwargs['post_id'])
-        )
         context['is_edit'] = True
         return context
 
     def form_valid(self, form):
-        if form.is_valid():
-            form.save()
-            return super().form_valid(form)
-        return self.form_class()
+        form.save()
+        return super().form_valid(form)
 
     def get_success_url(self) -> str:
         success_url = reverse_lazy(
@@ -194,12 +187,19 @@ class CommentView(LoginRequiredMixin, CreateView):
         post = Post.objects.get(id=self.kwargs['post_id'])
         return post
 
+    def get_context_data(self, **kwargs):
+        context = super(PostEditView, self).get_context_data(**kwargs)
+        context['comments'] = self.get_object().comments.all()
+        context['form'] = self.form_class()
+
     def form_valid(self, form):
-        comment = form.save(commit=False)
-        comment.author = self.request.user
-        comment.post = self.get_object()
-        comment.save()
-        return super().form_valid(form)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = self.request.user
+            comment.post = self.get_object()
+            comment.save()
+            return super().form_valid(form)
+        return self.form_class()
 
     def get_success_url(self):
         post_id = self.get_object().id
