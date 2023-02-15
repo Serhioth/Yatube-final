@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import (CreateView, DetailView, ListView, UpdateView,
+from django.views.generic import (CreateView, DetailView, ListView,
                                   RedirectView)
 from .forms import CommentForm, PostForm
 from .models import Comment, Follow, Group, Post
@@ -30,7 +30,7 @@ class IndexView(ListView):
         return context
 
 
-class GroupView(ListView):
+class GroupPostView(ListView):
     model = Group
     paginate_by = settings.PER_PAGE
 
@@ -43,7 +43,7 @@ class GroupView(ListView):
         return group_posts
 
     def get_context_data(self, **kwargs):
-        context = super(GroupView, self).get_context_data(**kwargs)
+        context = super(GroupPostView, self).get_context_data(**kwargs)
         paginator = Paginator(self.get_queryset(), self.paginate_by)
         page = self.request.GET.get('page')
         try:
@@ -99,7 +99,7 @@ class ProfileView(ListView):
 
 class PostDetailView(DetailView):
     model = Post
-    form = CommentForm()
+    form_class = CommentForm
 
     def get_object(self):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
@@ -122,7 +122,7 @@ class PostDetailView(DetailView):
         context['title'] = str(self.get_object())
         context['post'] = self.get_object()
         context['comments'] = self.get_comments
-        context['form'] = self.form
+        context['form'] = self.form_class
         return context
 
 
@@ -152,7 +152,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class PostEditView(LoginRequiredMixin, UpdateView):
+class PostEditView(LoginRequiredMixin, CreateView):
     template = 'posts/create_post.html'
     model = Post
     title = 'Редактирование записи'
