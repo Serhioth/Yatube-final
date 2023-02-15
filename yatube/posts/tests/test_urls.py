@@ -24,6 +24,7 @@ class PostsUrlsTests(TestCase):
         )
 
     def setUp(self) -> None:
+        super().setUp()
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -41,7 +42,6 @@ class PostsUrlsTests(TestCase):
             'post_edit':
                 self.authorized_client.get(f'/posts/{self.post.id}/edit/')
         }
-        super().setUp()
         cache.clear()
 
     def test_availability_of_pages(self):

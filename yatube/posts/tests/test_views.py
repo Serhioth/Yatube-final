@@ -53,6 +53,7 @@ class PostsPagesTest(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self) -> None:
+        super().setUp()
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -78,7 +79,6 @@ class PostsPagesTest(TestCase):
                     reverse('posts:post_edit',
                             kwargs={'post_id': self.post.id}))
         }
-        super().setUp()
         cache.clear()
 
     def test_page_uses_correct_template(self):

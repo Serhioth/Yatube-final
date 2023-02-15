@@ -34,9 +34,9 @@ class PostsFormTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self) -> None:
+        super().setUp()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        super().setUp()
         cache.clear()
 
     def test_create_new_post(self):
