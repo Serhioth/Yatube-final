@@ -16,7 +16,7 @@ class TestCustomErrors(TestCase):
             'core/404.html'
         )
         self.assertTemplateUsed(
-            self.guest_client.post(
+            self.csrf_client.post(
                 reverse_lazy(
                     'posts:index'
                 )
