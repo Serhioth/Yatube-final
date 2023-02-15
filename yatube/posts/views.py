@@ -194,19 +194,12 @@ class CommentView(LoginRequiredMixin, CreateView):
         post = Post.objects.get(id=self.kwargs['post_id'])
         return post
 
-    def get_context_data(self, **kwargs):
-        context = super(PostEditView, self).get_context_data(**kwargs)
-        context['comments'] = self.get_object().comments.all()
-        context['form'] = self.form_class()
-
     def form_valid(self, form):
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = self.request.user
-            comment.post = self.get_object()
-            comment.save()
-            return super().form_valid(form)
-        return self.form_class()
+        comment = form.save(commit=False)
+        comment.author = self.request.user
+        comment.post = self.get_object()
+        comment.save()
+        return super().form_valid(form)
 
     def get_success_url(self):
         post_id = self.get_object().id
