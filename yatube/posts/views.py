@@ -126,7 +126,7 @@ class PostDetailView(DetailView):
         return context
 
 
-class PostCreateView(LoginRequiredMixin, UpdateView):
+class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form = PostForm()
     title = 'Создание новой записи'
@@ -184,7 +184,7 @@ class PostEditView(LoginRequiredMixin, UpdateView):
         return success_url
 
 
-class CommentView(LoginRequiredMixin, CreateView):
+class CommentView(LoginRequiredMixin, UpdateView):
     model = Comment
     form_class = CommentForm
 
