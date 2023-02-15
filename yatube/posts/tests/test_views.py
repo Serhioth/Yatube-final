@@ -18,10 +18,7 @@ class PostsPagesTest(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.guest_client = Client()
         cls.user = User.objects.create_user(username='TestingUser')
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
 
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
@@ -50,35 +47,37 @@ class PostsPagesTest(TestCase):
             image=uploaded
         )
 
-        cls.responses = {
-            'index':
-                cls.authorized_client.get(reverse('posts:index')),
-            'groups':
-                cls.authorized_client.get(
-                    reverse('posts:group_list',
-                            kwargs={'slug': cls.group.slug})),
-            'profile':
-                cls.authorized_client.get(
-                    reverse('posts:profile',
-                            kwargs={'username': cls.user.username})),
-            'post_detail':
-                cls.authorized_client.get(
-                    reverse('posts:post_detail',
-                            kwargs={'post_id': cls.post.id})),
-            'post_create':
-                cls.authorized_client.get(reverse('posts:post_create')),
-            'post_edit':
-                cls.authorized_client.get(
-                    reverse('posts:post_edit',
-                            kwargs={'post_id': cls.post.id}))
-        }
-
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self) -> None:
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+        self.responses = {
+            'index':
+                self.authorized_client.get(reverse('posts:index')),
+            'groups':
+                self.authorized_client.get(
+                    reverse('posts:group_list',
+                            kwargs={'slug': self.group.slug})),
+            'profile':
+                self.authorized_client.get(
+                    reverse('posts:profile',
+                            kwargs={'username': self.user.username})),
+            'post_detail':
+                self.authorized_client.get(
+                    reverse('posts:post_detail',
+                            kwargs={'post_id': self.post.id})),
+            'post_create':
+                self.authorized_client.get(reverse('posts:post_create')),
+            'post_edit':
+                self.authorized_client.get(
+                    reverse('posts:post_edit',
+                            kwargs={'post_id': self.post.id}))
+        }
         super().setUp()
         cache.clear()
 

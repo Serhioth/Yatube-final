@@ -22,9 +22,6 @@ class PostsFormTests(TestCase):
         cls.user = User.objects.create(
             username='TestingUser'
         )
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
-
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
             slug='test-slug',
@@ -37,6 +34,8 @@ class PostsFormTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self) -> None:
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
         super().setUp()
         cache.clear()
 

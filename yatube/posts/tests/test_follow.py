@@ -30,11 +30,13 @@ class TestFollow(TestCase):
             author=cls.second_user
         )
 
-        cls.authorized_first_user = Client()
-        cls.authorized_first_user.force_login(cls.first_user)
+    def setUp(self) -> None:
+        super().setUp()
+        self.authorized_first_user = Client()
+        self.authorized_first_user.force_login(self.first_user)
 
-        cls.authorized_second_user = Client()
-        cls.authorized_second_user.force_login(cls.second_user)
+        self.authorized_second_user = Client()
+        self.authorized_second_user.force_login(self.second_user)
 
     def test_follow(self):
         """

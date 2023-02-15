@@ -12,12 +12,7 @@ class PostsUrlsTests(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-
-        cls.guest_client = Client()
         cls.user = User.objects.create_user(username='TestingUser')
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
-
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
             slug='test-slug',
@@ -27,22 +22,25 @@ class PostsUrlsTests(TestCase):
             text='Тестовый текст',
             author=cls.user
         )
-        cls.responses = {
-            'index':
-                cls.authorized_client.get('/'),
-            'groups':
-                cls.authorized_client.get(f'/group/{cls.group.slug}/'),
-            'profile':
-                cls.authorized_client.get(f'/profile/{cls.user.username}/'),
-            'post_detail':
-                cls.authorized_client.get(f'/posts/{cls.post.id}/'),
-            'post_create':
-                cls.authorized_client.get('/create/'),
-            'post_edit':
-                cls.authorized_client.get(f'/posts/{cls.post.id}/edit/')
-        }
 
     def setUp(self) -> None:
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+        self.responses = {
+            'index':
+                self.authorized_client.get('/'),
+            'groups':
+                self.authorized_client.get(f'/group/{self.group.slug}/'),
+            'profile':
+                self.authorized_client.get(f'/profile/{self.user.username}/'),
+            'post_detail':
+                self.authorized_client.get(f'/posts/{self.post.id}/'),
+            'post_create':
+                self.authorized_client.get('/create/'),
+            'post_edit':
+                self.authorized_client.get(f'/posts/{self.post.id}/edit/')
+        }
         super().setUp()
         cache.clear()
 
