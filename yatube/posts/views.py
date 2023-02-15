@@ -148,6 +148,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['title'] = self.title
+        context['form'] = self.form_class()
         return context
 
 
@@ -165,6 +166,9 @@ class PostEditView(LoginRequiredMixin, UpdateView):
         context = super(PostEditView, self).get_context_data(**kwargs)
         context['title'] = self.title
         context['post'] = self.get_object()
+        context['form'] = self.form_class(
+            instance=Post.objects.get(pk=self.kwargs['post_id'])
+        )
         context['is_edit'] = True
         return context
 
@@ -193,6 +197,7 @@ class CommentView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(PostEditView, self).get_context_data(**kwargs)
         context['comments'] = self.get_object().comments.all()
+        context['form'] = self.form_class()
 
     def form_valid(self, form):
         if form.is_valid():
