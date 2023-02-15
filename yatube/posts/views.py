@@ -99,7 +99,6 @@ class ProfileView(ListView):
 
 class PostDetailView(DetailView):
     model = Post
-    form_class = CommentForm
 
     def get_object(self):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
@@ -122,7 +121,6 @@ class PostDetailView(DetailView):
         context['title'] = str(self.get_object())
         context['post'] = self.get_object()
         context['comments'] = self.get_comments
-        context['form'] = self.form_class
         return context
 
 
@@ -148,7 +146,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['title'] = self.title
-        context['form'] = self.form_class
         return context
 
 
@@ -166,9 +163,6 @@ class PostEditView(LoginRequiredMixin, UpdateView):
         context = super(PostEditView, self).get_context_data(**kwargs)
         context['title'] = self.title
         context['post'] = self.get_object()
-        context['form'] = self.form_class(
-            instance=Post.objects.get(pk=self.kwargs['post_id'])
-        )
         context['is_edit'] = True
         return context
 
@@ -184,7 +178,7 @@ class PostEditView(LoginRequiredMixin, UpdateView):
         return success_url
 
 
-class CommentView(LoginRequiredMixin, UpdateView):
+class CommentView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
 
@@ -194,7 +188,6 @@ class CommentView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostEditView, self).get_context_data(**kwargs)
-        context['form'] = self.form_class
         context['comments'] = self.get_object().comments.all()
 
     def form_valid(self, form):

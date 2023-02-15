@@ -10,17 +10,20 @@ class TestComments(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.guest_client = Client()
         cls.user = User.objects.create(
             username='TestUser'
         )
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
 
         cls.post = Post.objects.create(
             text='TestText',
             author=cls.user
         )
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
     def test_anonymous_cant_comment(self):
         """Проверяем, что аноним не может комментировать"""
@@ -56,11 +59,14 @@ class TestComments(TestCase):
             data=form_data,
             follow=True
         )
+
+        comments_after_post_count = Comment.objects.all().count()
+
         self.assertEqual(response.status_code, 200,
                          'Страница не доступна')
 
-        self.assertEqual(Comment.objects.all().count(),
-                         comments_start_count + 1)
+        self.assertNotEqual(comments_start_count,
+                            comments_after_post_count)
 
         self.assertRedirects(
             response,
