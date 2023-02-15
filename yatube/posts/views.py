@@ -52,7 +52,8 @@ class GroupPostView(ListView):
             page_obj = paginator.page(1)
         except EmptyPage:
             page_obj = paginator.page(paginator.num_pages)
-        context['title'] = 'Сообщения группы'
+        context['title'] = f'Сообщения группы {self.get_object().title}'
+        context['description'] = self.get_object().description
         context['group'] = self.get_object()
         context['page_obj'] = page_obj
         return context
@@ -190,6 +191,11 @@ class CommentView(LoginRequiredMixin, CreateView):
     def get_object(self):
         post = Post.objects.get(id=self.kwargs['post_id'])
         return post
+
+    def get_context_data(self, **kwargs):
+        context = super(PostEditView, self).get_context_data(**kwargs)
+        context['form'] = self.form_class
+        context['comments'] = self.get_object().comments.all()
 
     def form_valid(self, form):
         comment = form.save(commit=False)
