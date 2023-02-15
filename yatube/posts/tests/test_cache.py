@@ -26,8 +26,7 @@ class TestCache(TestCase):
         """
         post = Post.objects.create(
             text='TestCacheText',
-            author=self.user,
-            group=self.group
+            author=self.user
         )
 
         response = self.authorized_client.get(
