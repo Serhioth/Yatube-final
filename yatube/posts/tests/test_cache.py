@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
-from posts.models import Post, Group
+from posts.models import Post
 
 User = get_user_model()
 
