@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import (CreateView, DetailView, ListView,
+from django.views.generic import (CreateView, DetailView, ListView, UpdateView
                                   RedirectView)
 from .forms import CommentForm, PostForm
 from .models import Comment, Follow, Group, Post
@@ -128,7 +128,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    form_class = PostForm
+    form = PostForm()
     title = 'Создание новой записи'
 
     def form_valid(self, form):
@@ -148,11 +148,11 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(PostCreateView, self).get_context_data(**kwargs)
         context['title'] = self.title
-        context['form'] = self.form_class
+        context['form'] = self.form
         return context
 
 
-class PostEditView(LoginRequiredMixin, CreateView):
+class PostEditView(LoginRequiredMixin, UpdateView):
     template = 'posts/create_post.html'
     model = Post
     title = 'Редактирование записи'
