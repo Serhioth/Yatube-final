@@ -30,7 +30,7 @@ class IndexView(ListView):
         return context
 
 
-class GroupPostView(ListView):
+class GroupView(ListView):
     model = Group
     paginate_by = settings.PER_PAGE
 
@@ -43,7 +43,7 @@ class GroupPostView(ListView):
         return group_posts
 
     def get_context_data(self, **kwargs):
-        context = super(GroupPostView, self).get_context_data(**kwargs)
+        context = super(GroupView, self).get_context_data(**kwargs)
         paginator = Paginator(self.get_queryset(), self.paginate_by)
         page = self.request.GET.get('page')
         try:
