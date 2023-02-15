@@ -125,6 +125,7 @@ class PostDetailView(DetailView):
         context['comments'] = self.get_comments()
         return context
 
+
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
