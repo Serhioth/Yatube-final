@@ -26,9 +26,8 @@ urlpatterns = [
     ),
     path(
         'group/<slug:slug>/',
-        cache_page(20, key_prefix='group_list_page')(
-            views.GroupPostView.as_view(
-                template_name='posts/group_list.html')
+        views.GroupPostView.as_view(
+            template_name='posts/group_list.html'
         ),
         name='group_list'
     ),
