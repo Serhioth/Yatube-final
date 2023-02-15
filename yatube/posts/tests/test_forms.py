@@ -19,7 +19,7 @@ class PostsFormTests(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.user = User.objects.create_user(
+        cls.user = User.objects.create(
             username='TestingUser'
         )
         cls.authorized_client = Client()

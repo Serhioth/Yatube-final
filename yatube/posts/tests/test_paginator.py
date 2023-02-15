@@ -15,7 +15,7 @@ class TestPaginatorView(TestCase):
     def setUpClass(cls) -> None:
         cache.clear()
         super().setUpClass()
-        cls.user = User.objects.create_user(username='TestingUser')
+        cls.user = User.objects.create(username='TestingUser')
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
 
@@ -69,6 +69,7 @@ class TestPaginatorView(TestCase):
     def test_show_10_posts_per_page(self):
         """Проверяем корректность работы паджинатора"""
         for response in self.responses.values():
+            print(len(response.context['page_obj']))
             with self.subTest(response=response):
                 self.assertEqual(len(response.context['page_obj']), PER_PAGE)
 
