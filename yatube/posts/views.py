@@ -99,7 +99,7 @@ class ProfileView(ListView):
 
 class PostDetailView(DetailView):
     model = Post
-    form_class = CommentForm
+    form_class = CommentForm()
 
     def get_object(self):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
@@ -128,7 +128,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    form_class = PostForm
+    form_class = PostForm()
     title = 'Создание новой записи'
 
     def form_valid(self, form):
@@ -156,7 +156,7 @@ class PostEditView(LoginRequiredMixin, UpdateView):
     template = 'posts/create_post.html'
     model = Post
     title = 'Редактирование записи'
-    form_class = PostForm
+    form_class = PostForm()
 
     def get_object(self):
         post = get_object_or_404(Post, id=self.kwargs['post_id'])
@@ -186,7 +186,7 @@ class PostEditView(LoginRequiredMixin, UpdateView):
 
 class CommentView(LoginRequiredMixin, CreateView):
     model = Comment
-    form_class = CommentForm
+    form_class = CommentForm()
 
     def get_object(self):
         post = Post.objects.get(id=self.kwargs['post_id'])
