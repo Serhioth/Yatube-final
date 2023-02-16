@@ -6,7 +6,7 @@
 </div>
 <div class="container">        
   <h4>Всего записей: {{ author.posts.count }}</h4>
-  {% if author != request.user %}
+  {% if author != request.user or request.user.is_anonymous %}
     {% if following %}
       <a
         class="btn btn-lg btn-light"

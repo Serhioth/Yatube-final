@@ -1,13 +1,14 @@
 import shutil
 import tempfile
+from http import HTTPStatus
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
-from django.urls import reverse
-from posts.models import Group, Post
-from django.core.cache import cache
+from django.urls import reverse_lazy
+from posts.models import Follow, Group, Post
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 User = get_user_model()
@@ -18,7 +19,7 @@ class PostsPagesTest(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        cls.user = User.objects.create_user(username='TestingUser')
+        cls.user = User.objects.create(username='TestingUser')
 
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
@@ -54,47 +55,32 @@ class PostsPagesTest(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
+        cache.clear()
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.responses = {
             'index':
-                self.authorized_client.get(reverse('posts:index')),
+                self.authorized_client.get(reverse_lazy('posts:index')),
             'groups':
                 self.authorized_client.get(
-                    reverse('posts:group_list',
-                            kwargs={'slug': self.group.slug})),
+                    reverse_lazy('posts:group_list',
+                                 kwargs={'slug': self.group.slug})),
             'profile':
                 self.authorized_client.get(
-                    reverse('posts:profile',
-                            kwargs={'username': self.user.username})),
+                    reverse_lazy('posts:profile',
+                                 kwargs={'username': self.user.username})),
             'post_detail':
                 self.authorized_client.get(
-                    reverse('posts:post_detail',
-                            kwargs={'post_id': self.post.id})),
+                    reverse_lazy('posts:post_detail',
+                                 kwargs={'post_id': self.post.id})),
             'post_create':
-                self.authorized_client.get(reverse('posts:post_create')),
+                self.authorized_client.get(reverse_lazy('posts:post_create')),
             'post_edit':
                 self.authorized_client.get(
-                    reverse('posts:post_edit',
-                            kwargs={'post_id': self.post.id}))
+                    reverse_lazy('posts:post_edit',
+                                 kwargs={'post_id': self.post.id}))
         }
-        cache.clear()
-
-    def test_page_uses_correct_template(self):
-        """Проверка, что открываются верные шаблоны"""
-        templates = [
-            'posts/index.html',
-            'posts/group_list.html',
-            'posts/profile.html',
-            'posts/post_detail.html',
-            'posts/create_post.html',
-            'posts/create_post.html'
-        ]
-        for response, template in zip(self.responses.values(), templates):
-            with self.subTest(response=response):
-                self.assertTemplateUsed(response, template,
-                                        f'Не тот шаблон {template}')
 
     def test_page_get_correct_titles(self):
         """Проверка, что значение titles верно передано"""
@@ -131,3 +117,107 @@ class PostsPagesTest(TestCase):
         ]
         for post in posts:
             return self.check_post(post)
+
+
+class TestFollow(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+
+        cls.first_user = User.objects.create(
+            username='FirstFollowUser'
+        )
+
+        cls.second_user = User.objects.create(
+            username='SecondFollowUser'
+        )
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.authorized_first_user = Client()
+        self.authorized_first_user.force_login(self.first_user)
+
+        self.authorized_second_user = Client()
+        self.authorized_second_user.force_login(self.second_user)
+
+        self.follow = Follow.objects.create(
+            author=self.first_user,
+            user=self.second_user
+        )
+
+    def test_follow(self):
+        """
+        Проверка корректности работы Follow
+        """
+        start_count = Follow.objects.all().count()
+        follow_response = self.authorized_first_user.get(
+            reverse_lazy(
+                'posts:profile_follow',
+                kwargs={'username': self.second_user.username}
+            )
+        )
+        after_follow_count = Follow.objects.all().count()
+
+        self.assertEqual(
+            follow_response.status_code,
+            HTTPStatus.FOUND
+        )
+
+        self.assertTrue(
+            Follow.objects.filter(
+                user=self.first_user,
+                author=self.second_user
+            ).exists()
+        )
+
+        self.assertNotEqual(
+            start_count,
+            after_follow_count
+        )
+
+    def test_unfollow(self):
+        start_count = Follow.objects.all().count()
+
+        unfollow_response = self.authorized_second_user.get(
+            reverse_lazy(
+                'posts:profile_unfollow',
+                kwargs={'username': self.first_user.username}
+            )
+        )
+
+        after_unfollow_count = Follow.objects.all().count()
+
+        self.assertEqual(
+            unfollow_response.status_code,
+            HTTPStatus.FOUND
+        )
+
+        self.assertNotEqual(
+            start_count,
+            after_unfollow_count
+        )
+
+    def test_follow_index(self):
+        """
+        Проверка корректности работы FollowIndex
+        """
+        responses = {
+            'first_follow_index_response': self.authorized_first_user.get(
+                reverse_lazy('posts:follow_index')
+            ),
+            'second_follow_index_response': self.authorized_second_user.get(
+                reverse_lazy('posts:follow_index')
+            )
+        }
+
+        for response in responses.values():
+            with self.subTest(response=response):
+                self.assertEqual(
+                    response.status_code,
+                    HTTPStatus.OK
+                )
+
+        self.assertNotEqual(
+            responses['first_follow_index_response'].content,
+            responses['second_follow_index_response'].content
+        )

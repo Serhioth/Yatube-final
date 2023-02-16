@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
-from posts.models import Group, Post
 from django.core.cache import cache
+from django.test import TestCase
+from posts.models import Comment, Follow, Group, Post
 
 User = get_user_model()
 
@@ -34,7 +34,8 @@ class PostModelTest(TestCase):
             'text': 'Текст поста',
             'pub_date': 'Дата публикации',
             'author': 'Автор',
-            'group': 'Группа'
+            'group': 'Группа',
+            'image': 'Картинка'
         }
 
         for field, expected in post_expected_names.items():
@@ -87,6 +88,7 @@ class TestGroupModel(TestCase):
 
         group_expected_names = {
             'title': 'Группа, к которой будет относиться пост',
+            'slug': 'Слаг группы',
             'description': 'Описание группы'
         }
 
@@ -94,12 +96,128 @@ class TestGroupModel(TestCase):
             with self.subTest(field=field):
                 self.assertEqual(
                     task_group._meta.get_field(field).verbose_name,
-                    expected)
+                    expected,
+                    f'verbose_name {field} не соответствует ожидаемому'
+                )
 
+    def test_help_text(self):
+        """Help_text в полях Group совпадает с ожидаемым"""
+        task_group = self.group
+
+        group_expected_names = {
+            'title': 'Группа',
+            'slug': 'Слаг группы',
+            'description': 'Описание группы'
+        }
         for field, expected in group_expected_names.items():
             with self.subTest(field=field):
                 self.assertEqual(
-                    task_group._meta.get_field(field).verbose_name,
+                    task_group._meta.get_field(field).help_text,
+                    expected,
+                    f'help_text {field} не соответствует ожидаемому'
+                )
+
+
+class TestCommentModel(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.user = User.objects.create(
+            username='CommentTestUser'
+        )
+
+        cls.post = Post.objects.create(
+            text='TestCommentsText',
+            author=cls.user
+        )
+
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=cls.user,
+            text='TestCommentsText'
+        )
+
+    def test_comment_verbose_name(self):
+        """Verbose_name в полях Comment совпадает с ожидаемым"""
+        task_comment = self.comment
+
+        comment_expected_names = {
+            'post': 'Связанный пост',
+            'author': 'Автор коммента',
+            'text': 'Текст комментария'
+        }
+
+        for field, expected in comment_expected_names.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    task_comment._meta.get_field(field).verbose_name,
                     expected,
                     f'verbose_name {field} не соответствует ожидаемому'
+                )
+
+    def test_help_text(self):
+        """Help_text в полях Comment совпадает с ожидаемым"""
+        task_comment = self.comment
+
+        comment_expected_names = {
+            'post': 'Пост, к которому привязан комментарий',
+            'author': 'Автор комментария',
+            'text': 'Текст комментария'
+        }
+        for field, expected in comment_expected_names.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    task_comment._meta.get_field(field).help_text,
+                    expected,
+                    f'help_text {field} не соответствует ожидаемому'
+                )
+
+
+class TestFollowModel(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.user = User.objects.create(
+            username='FollowUser'
+        )
+        cls.author = User.objects.create(
+            username='FollowAuthor'
+        )
+
+        cls.following = Follow.objects.create(
+            user=cls.user,
+            author=cls.author
+        )
+
+    def test_follow_verbose_name(self):
+        """Verbose_name в полях Follow совпадает с ожидаемым"""
+        task_following = self.following
+
+        following_expected_names = {
+            'user': 'Подписчик',
+            'author': 'Автор',
+        }
+
+        for field, expected in following_expected_names.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    task_following._meta.get_field(field).verbose_name,
+                    expected,
+                    f'verbose_name {field} не соответствует ожидаемому'
+                )
+
+    def test_help_text(self):
+        """Help_text в полях Follow совпадает с ожидаемым"""
+        task_following = self.following
+
+        following_expected_names = {
+            'user': 'Подписчик',
+            'author': 'Автор',
+        }
+        for field, expected in following_expected_names.items():
+            with self.subTest(field=field):
+                self.assertEqual(
+                    task_following._meta.get_field(field).help_text,
+                    expected,
+                    f'help_text {field} не соответствует ожидаемому'
                 )

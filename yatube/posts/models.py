@@ -1,19 +1,29 @@
+from core.models import CreatedModel
 from django.contrib.auth import get_user_model
 from django.db import models
-from core.models import CreatedModel
 
 
 class Group(models.Model):
-    title = models.CharField('Группа, к которой будет относиться пост',
-                             max_length=200)
-    slug = models.SlugField(unique=True)
-    description = models.TextField('Описание группы')
+    title = models.CharField(
+        'Группа, к которой будет относиться пост',
+        max_length=200,
+        help_text='Группа'
+    )
+    slug = models.SlugField(
+        'Слаг группы',
+        unique=True,
+        help_text='Слаг группы'
+    )
+    description = models.TextField(
+        'Описание группы',
+        help_text='Описание группы'
+    )
 
     def __str__(self) -> str:
         return self.title
 
     def __len__(self):
-        return len(self.posts.all())
+        return Post.objects.filter(group__slug=self.slug).count()
 
 
 User = get_user_model()
@@ -43,7 +53,8 @@ class Post(CreatedModel):
     image = models.ImageField(
         'Картинка',
         upload_to='posts/',
-        blank=True
+        blank=True,
+        help_text='Изображение'
     )
 
     class Meta:
@@ -56,6 +67,11 @@ class Post(CreatedModel):
 
 
 class Comment(CreatedModel):
+    class Meta:
+        ordering = ('-pub_date',)
+        verbose_name = 'Коммент'
+        verbose_name_plural = 'Комменты'
+
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
@@ -75,13 +91,20 @@ class Comment(CreatedModel):
         help_text='Текст комментария'
     )
 
-    class Meta:
-        ordering = ('-pub_date',)
-        verbose_name = 'Коммент'
-        verbose_name_plural = 'Комменты'
+    def __str__(self):
+        return self.text[:15]
 
 
 class Follow(models.Model):
+    class Meta():
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_following'),
+        ]
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -95,6 +118,9 @@ class Follow(models.Model):
         related_name='following',
         null=True,
         on_delete=models.CASCADE,
-        verbose_name='Подписан',
-        help_text='Подписан'
+        verbose_name='Автор',
+        help_text='Автор'
     )
+
+    def __str__(self) -> str:
+        return f'{self.user} подписан на {self.author}'

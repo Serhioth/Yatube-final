@@ -3,12 +3,12 @@ import tempfile
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
-from django.urls import reverse
-from posts.forms import PostForm, CommentForm
-from posts.models import Group, Post
-from django.core.cache import cache
+from django.urls import reverse_lazy
+from posts.forms import CommentForm, PostForm
+from posts.models import Comment, Group, Post
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -20,7 +20,7 @@ class PostsFormTests(TestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.user = User.objects.create(
-            username='TestingUser'
+            username='FormTestingUser'
         )
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
@@ -35,9 +35,9 @@ class PostsFormTests(TestCase):
 
     def setUp(self) -> None:
         super().setUp()
+        cache.clear()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        cache.clear()
 
     def test_create_new_post(self):
         """
@@ -65,13 +65,13 @@ class PostsFormTests(TestCase):
             'image': uploaded,
         }
         response = self.authorized_client.post(
-            reverse('posts:post_create'),
+            reverse_lazy('posts:post_create'),
             data=form_data,
             follow=True
         )
         self.assertRedirects(
             response,
-            reverse(
+            reverse_lazy(
                 'posts:profile',
                 kwargs={
                     'username': self.user.username
@@ -125,7 +125,7 @@ class PostsFormTests(TestCase):
         }
         start_count = Post.objects.all().count()
         response = self.authorized_client.post(
-            reverse(
+            reverse_lazy(
                 'posts:post_edit',
                 kwargs={'post_id': post.id}
             ),
@@ -134,7 +134,7 @@ class PostsFormTests(TestCase):
         )
         self.assertRedirects(
             response,
-            reverse(
+            reverse_lazy(
                 'posts:posts_detail',
                 kwargs={'post_id': post.id}
             )
@@ -149,4 +149,75 @@ class PostsFormTests(TestCase):
         self.assertEqual(
             Post.objects.all().count(),
             start_count
+        )
+
+
+class TestComments(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls.user = User.objects.create(
+            username='TestUser'
+        )
+
+        cls.post = Post.objects.create(
+            text='TestText',
+            author=cls.user
+        )
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_anonymous_cant_comment(self):
+        """Проверяем, что аноним не может комментировать"""
+        comments_count = Comment.objects.all().count()
+
+        form_data = {'text': 'You shall not pass!'}
+
+        response = self.guest_client.post(
+            reverse_lazy('posts:add_comment',
+                         kwargs={'post_id': self.post.id}
+                         ),
+            data=form_data,
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200,
+                         'Страница не доступна')
+        self.assertEqual(comments_count, 0,
+                         'Анониму удалось отправить коммент')
+
+    def test_authorized_can_comment(self):
+        """
+        Проверяем, что авторизованный пользователь
+        может оставлять комментарии
+        """
+        comments_start_count = Comment.objects.all().count()
+
+        form_data = {'text': 'Gotcha!'}
+
+        response = self.authorized_client.post(
+            reverse_lazy('posts:add_comment',
+                         kwargs={'post_id': self.post.id}
+                         ),
+            data=form_data,
+            follow=True
+        )
+
+        comments_after_post_count = Comment.objects.all().count()
+
+        self.assertEqual(response.status_code, 200,
+                         'Страница не доступна')
+
+        self.assertNotEqual(comments_start_count,
+                            comments_after_post_count)
+
+        self.assertRedirects(
+            response,
+            reverse_lazy(
+                'posts:post_detail',
+                kwargs={'post_id': self.post.id}
+            )
         )

@@ -1,9 +1,9 @@
-from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
 from http import HTTPStatus
-from posts.models import Post, Group
-from django.core.cache import cache
 
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.test import Client, TestCase
+from posts.models import Group, Post
 
 User = get_user_model()
 
@@ -40,7 +40,15 @@ class PostsUrlsTests(TestCase):
             'post_create':
                 self.authorized_client.get('/create/'),
             'post_edit':
-                self.authorized_client.get(f'/posts/{self.post.id}/edit/')
+                self.authorized_client.get(f'/posts/{self.post.id}/edit/'),
+            'follow_index':
+                self.authorized_client.get('/follow/'),
+            'add_comment':
+                self.authorized_client.post(
+                    f'/posts/{self.post.id}/comment/',
+                    data={'text': 'TestComment'},
+                    follow=True
+                )
         }
         cache.clear()
 
@@ -77,12 +85,33 @@ class PostsUrlsTests(TestCase):
             self.responses['post_create']:
                 'posts/create_post.html',
             self.responses['post_edit']:
-                'posts/create_post.html'
+                'posts/create_post.html',
+            self.responses['follow_index']:
+                'posts/follow.html',
+            self.responses['add_comment']:
+                'posts/post_detail.html'
         }
         for response, template in responses.items():
             with self.subTest(response=response):
                 self.assertTemplateUsed(response, template,
                                         'Использован неверный шаблон')
+
+    def test_redirect_pages(self):
+        """
+        Проверка корректности работы страниц переадресации
+        """
+        responses = [
+            self.authorized_client.get(
+                f'/profile/{self.user.username}/follow/'
+            ),
+            self.authorized_client.get(
+                f'/profile/{self.user.username}/unfollow/'
+            )
+        ]
+
+        for response in responses:
+            with self.subTest(response=response):
+                self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_redirect_anonymous(self):
         """Переадресация анонимного пользователя"""
