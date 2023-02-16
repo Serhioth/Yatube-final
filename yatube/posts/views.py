@@ -231,5 +231,5 @@ class UnfollowView(LoginRequiredMixin, RedirectView):
 class FollowIndexView(LoginRequiredMixin, DataListMixin, ListView):
     extra_context = {'title': 'Лента избранного'}
 
-    def get_posts(self):
+    def get_queryset(self):
         return Post.objects.filter(author__following__user=self.request.user)
