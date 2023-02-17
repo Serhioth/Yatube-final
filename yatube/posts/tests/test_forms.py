@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+from http import HTTPStatus
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -7,6 +8,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse_lazy
+
 from posts.forms import CommentForm, PostForm
 from posts.models import Comment, Group, Post
 
@@ -184,7 +186,7 @@ class TestComments(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertEqual(response.status_code, 200,
+        self.assertEqual(response.status_code, HTTPStatus.OK,
                          'Страница не доступна')
         self.assertEqual(comments_count, 0,
                          'Анониму удалось отправить коммент')
@@ -208,7 +210,15 @@ class TestComments(TestCase):
 
         comments_after_post_count = Comment.objects.all().count()
 
-        self.assertEqual(response.status_code, 200,
+        self.assertTrue(
+            Comment.objects.filter(
+                author=self.user,
+                post=self.post,
+                text=form_data['text']
+            )
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK,
                          'Страница не доступна')
 
         self.assertNotEqual(comments_start_count,

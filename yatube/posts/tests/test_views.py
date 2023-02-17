@@ -8,6 +8,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse_lazy
+
 from posts.models import Follow, Group, Post
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -81,20 +82,6 @@ class PostsPagesTest(TestCase):
                     reverse_lazy('posts:post_edit',
                                  kwargs={'post_id': self.post.id}))
         }
-
-    def test_page_get_correct_titles(self):
-        """Проверка, что значение titles верно передано"""
-        titles = [
-            'Последние обновления на сайте',
-            f'Сообщения группы {self.group.title}',
-            f'Профиль пользователя {self.user.get_full_name()}',
-            str(self.post),
-            'Создание новой записи',
-            'Редактирование записи'
-        ]
-        for response, title in zip(self.responses.values(), titles):
-            with self.subTest(response=response):
-                self.assertEqual(response.context.get('title'), title)
 
     def check_post(self, post):
         """Тесты для проверки постов"""

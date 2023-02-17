@@ -1,5 +1,6 @@
 from django.urls import path
 from django.views.decorators.cache import cache_page
+
 from posts import views
 
 app_name = 'posts'

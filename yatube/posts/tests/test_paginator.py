@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import Client, TestCase
 from django.urls import reverse
-from posts.models import Group, Post
 
+from posts.models import Follow, Group, Post
 from yatube.settings import PER_PAGE
 
 User = get_user_model()
@@ -16,6 +16,12 @@ class TestPaginatorView(TestCase):
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.user = User.objects.create(username='TestingUser')
+        cls.follow_user = User.objects.create(username='FollowTestUser')
+
+        cls.follow = Follow.objects.create(
+            author=cls.user,
+            user=cls.follow_user
+        )
 
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
@@ -38,6 +44,9 @@ class TestPaginatorView(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
+        self.follow_client = Client()
+        self.follow_client.force_login(self.follow_user)
+
         self.responses = {
             'index':
                 self.authorized_client.get(reverse('posts:index')),
@@ -48,7 +57,11 @@ class TestPaginatorView(TestCase):
             'profile':
                 self.authorized_client.get(
                     reverse('posts:profile',
-                            kwargs={'username': self.user.username}))
+                            kwargs={'username': self.user.username})),
+            'follow_index':
+                self.follow_client.get(
+                    reverse('posts:follow_index')
+                )
         }
 
         self.responses_page_2 = {
@@ -62,7 +75,11 @@ class TestPaginatorView(TestCase):
                 self.authorized_client.get(
                     reverse('posts:profile',
                             kwargs={'username': self.user.username})
-                    + '?page=2')
+                    + '?page=2'),
+            'follow_index':
+                self.follow_client.get(
+                    reverse('posts:follow_index') + '?page=2'
+                )
         }
         cache.clear()
 

@@ -1,6 +1,7 @@
-from core.models import CreatedModel
 from django.contrib.auth import get_user_model
 from django.db import models
+
+from core.models import CreatedModel
 
 
 class Group(models.Model):
@@ -67,11 +68,6 @@ class Post(CreatedModel):
 
 
 class Comment(CreatedModel):
-    class Meta:
-        ordering = ('-pub_date',)
-        verbose_name = 'Коммент'
-        verbose_name_plural = 'Комменты'
-
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
@@ -91,20 +87,16 @@ class Comment(CreatedModel):
         help_text='Текст комментария'
     )
 
+    class Meta:
+        ordering = ('-pub_date',)
+        verbose_name = 'Коммент'
+        verbose_name_plural = 'Комменты'
+
     def __str__(self):
         return self.text[:15]
 
 
 class Follow(models.Model):
-    class Meta():
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'author'],
-                name='unique_following'),
-        ]
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -121,6 +113,15 @@ class Follow(models.Model):
         verbose_name='Автор',
         help_text='Автор'
     )
+
+    class Meta():
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'author'),
+                name='unique_following'),
+        )
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
 
     def __str__(self) -> str:
         return f'{self.user} подписан на {self.author}'

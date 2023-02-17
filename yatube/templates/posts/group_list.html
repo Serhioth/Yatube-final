@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load thumbnail %}
-{% block title %}title{% endblock title %}
+{% block title %}Сообщения группы {{ group.title }}{% endblock title %}
 {% block content %}
   <div class="container">
-    <h1>Группа: {{ title }}</h1>
+    <h1>Группа: {{ group.title }}</h1>
   </div>
   <div class="container d-flex justify-content-between align-items-center">        
-    <p>{{ description }}</p>
+    <p>{{ group.description }}</p>
     <p>Всего записей: {{ group.posts.count }}</p>
   </div>
 {% for post in page_obj %}

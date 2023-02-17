@@ -6,8 +6,8 @@ from django.urls import reverse_lazy
 from django.views.generic import (CreateView, DetailView, ListView,
                                   RedirectView, UpdateView)
 
-from .forms import CommentForm, PostForm
-from .models import Comment, Follow, Group, Post
+from posts.forms import CommentForm, PostForm
+from posts.models import Follow, Group, Post
 
 User = get_user_model()
 
@@ -18,15 +18,12 @@ class DataListMixin:
 
 
 class IndexView(DataListMixin, ListView):
-    extra_context = {'title': 'Последние обновления на сайте'}
 
     def get_queryset(self):
         return Post.objects.all()
 
 
 class GroupPostView(DataListMixin, ListView):
-    model = Group
-    paginate_by = settings.PER_PAGE
 
     def get_object(self):
         return get_object_or_404(Group, slug=self.kwargs.get('slug'))
@@ -36,14 +33,11 @@ class GroupPostView(DataListMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(GroupPostView, self).get_context_data(**kwargs)
-        context['title'] = f'Сообщения группы {self.get_object().title}'
-        context['description'] = self.get_object().description
         context['group'] = self.get_object()
         return context
 
 
 class ProfileView(DataListMixin, ListView):
-    model = User
 
     def get_object(self):
         return get_object_or_404(User, username=self.kwargs.get('username'))
@@ -53,9 +47,6 @@ class ProfileView(DataListMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
-        context['title'] = (
-            f'Профиль пользователя {self.get_object().get_full_name()}'
-        )
         context['author'] = self.get_object()
         authenticated = self.request.user.is_authenticated
         following = authenticated and Follow.objects.filter(
@@ -66,8 +57,6 @@ class ProfileView(DataListMixin, ListView):
 
 
 class PostDetailView(DetailView):
-    model = Post
-    form = CommentForm()
 
     def get_object(self):
         return get_object_or_404(Post, id=self.kwargs.get('post_id'))
@@ -84,17 +73,14 @@ class PostDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
-        context['title'] = str(self.get_object())
         context['post'] = self.get_object()
-        context['form'] = self.form
+        context['form'] = CommentForm()
         context['comments'] = self.get_comments()
         return context
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Post
     form_class = PostForm
-    title = 'Создание новой записи'
 
     def form_valid(self, form):
         post = form.save(commit=False)
@@ -109,16 +95,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             kwargs={'username': username}
         )
 
-    def get_context_data(self, **kwargs):
-        context = super(PostCreateView, self).get_context_data(**kwargs)
-        context['title'] = self.title
-        return context
-
 
 class PostEditView(LoginRequiredMixin, UpdateView):
-    template = 'posts/create_post.html'
-    model = Post
-    title = 'Редактирование записи'
     form_class = PostForm
 
     def get_object(self):
@@ -126,7 +104,6 @@ class PostEditView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(PostEditView, self).get_context_data(**kwargs)
-        context['title'] = self.title
         context['post'] = self.get_object()
         context['is_edit'] = True
         return context
@@ -143,7 +120,6 @@ class PostEditView(LoginRequiredMixin, UpdateView):
 
 
 class CommentView(LoginRequiredMixin, CreateView):
-    model = Comment
     form_class = CommentForm
 
     def get_object(self):
@@ -152,7 +128,7 @@ class CommentView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(CommentView, self).get_context_data(**kwargs)
         context['comments'] = self.get_object().comments.all()
-        context['form'] = self.form_class()
+        context['form'] = CommentForm()
         return context
 
     def form_valid(self, form):
@@ -173,7 +149,6 @@ class CommentView(LoginRequiredMixin, CreateView):
 
 
 class FollowView(LoginRequiredMixin, RedirectView):
-    template_name = 'posts/profile.html'
 
     def get(self, *args, **kwargs):
         if self.kwargs.get('username') == self.request.user.username:
@@ -204,7 +179,6 @@ class FollowView(LoginRequiredMixin, RedirectView):
 
 
 class UnfollowView(LoginRequiredMixin, RedirectView):
-    template_name = 'posts/profile.html'
 
     def get(self, *args, **kwargs):
         follower = Follow.objects.filter(
@@ -229,7 +203,6 @@ class UnfollowView(LoginRequiredMixin, RedirectView):
 
 
 class FollowIndexView(LoginRequiredMixin, DataListMixin, ListView):
-    extra_context = {'title': 'Лента избранного'}
 
     def get_queryset(self):
         return Post.objects.filter(author__following__user=self.request.user)
