@@ -83,6 +83,23 @@ class PostsPagesTest(TestCase):
                                  kwargs={'post_id': self.post.id}))
         }
 
+    def test_titles(self):
+        """
+        Проверяем корректность переданных titles
+        """
+        titles = [
+            'Последние обновления на сайте',
+            f'Сообщения группы {self.group.title}',
+            f'Профиль пользователя {self.user.get_full_name()}',
+            str(self.post),
+            'Создание записи',
+            'Редактирование записи'
+        ]
+
+        for response, title in zip(self.responses.values(), titles):
+            with self.subTest(response=response):
+                self.assertContains(response, title)
+
     def check_post(self, post):
         """Тесты для проверки постов"""
         self.assertEqual(post.text, self.post.text)
