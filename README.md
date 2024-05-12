@@ -24,7 +24,7 @@ The project is implemented using the MVT (Model-View-Template) architecture. It 
 ## Installation from Repository (Linux and macOS)
 1. Clone the repository and navigate to it in the command line:
 
-git clone git@github.com:NikitaChalykh/YaTube.git cd YaTube
+git clone git@github.com:Serhioth/YaTube.git cd YaTube
 
 
 2. Create and activate a virtual environment:
