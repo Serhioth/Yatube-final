@@ -35,17 +35,25 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 3. Install dependencies from the `requirements.txt` file:
-
-- pip install --upgrade pip
-- pip install -r requirements.txt
-
+```bash
+pip install --upgrade pip
+```
+```bash
+pip install -r requirements.txt
+```
 
 4. Run migrations:
-
-- cd ./yatube
-- python manage.py makemigrations
-- python manage.py migrate
+```bash
+cd ./yatube
+```
+```bash
+python manage.py makemigrations
+```
+```bash
+python manage.py migrate
+```
 
 5. Start the project (in Django server mode):
-
-- python manage.py runserver
+```bash
+python manage.py runserver
+```
