@@ -1,3 +1,47 @@
-# hw05_final
+# YaTube: A Social Network for Posts and Images (Yandex.Praktikum)
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+## Project Description
+This project was created as part of the Yandex.Praktikum educational course.
+
+YaTube is a social network for authors and followers. Users can subscribe to their favorite authors, leave and delete comments on posts, create new posts on the main page and in thematic groups, and attach images to their published posts.
+
+The project is implemented using the MVT (Model-View-Template) architecture. It includes features such as user registration, password recovery via email, unit testing using `unittest`, post pagination, and page caching.
+
+## System Requirements
+- Python 3.8+
+- Works on Linux, Windows, macOS, and BSD
+
+## Technology Stack
+- Python 3.8
+- Django 2.2
+- Unittest
+- Pytest
+- SQLite3
+- CSS
+- JS
+- HTML
+
+## Installation from Repository (Linux and macOS)
+1. Clone the repository and navigate to it in the command line:
+
+git clone git@github.com:NikitaChalykh/YaTube.git cd YaTube
+
+
+2. Create and activate a virtual environment:
+
+python3 -m venv env source env/bin/activate
+
+
+3. Install dependencies from the `requirements.txt` file:
+
+python3 -m pip install --upgrade pip pip install -r requirements.txt
+
+
+4. Run migrations:
+
+cd hw05_final python3 manage.py migrate
+
+
+5. Start the project (in Django server mode):
+
+python3 manage.py runserver
