@@ -28,10 +28,12 @@ git clone git@github.com:Serhioth/Yatube-final.git
 ```
 
 2. Create and activate a virtual environment:
-
-- python3 -m venv venv
-- source venv/bin/activate
-
+```bash
+python3 -m venv venv
+```
+```bash
+source venv/bin/activate
+```
 3. Install dependencies from the `requirements.txt` file:
 
 - pip install --upgrade pip
